@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>EV Charging Payment Demo</title>
+  <script src="paho-mqtt.js"></script>
+  <script src="mqtt.js"></script>
+</head>
+
+<body>
+
+  <pre id="consolePre"></pre>
+
+</body>
+
+<script type="text/javascript">
+
+var host = window.location.host;
+var url = new URL(window.location.href);
+var mqtt_host = url.searchParams.get("mqtt_host");
+var mqtt_port = url.searchParams.get("mqtt_port");
+
+function mqtt_message_callback(message) {
+    var topic = message.destinationName;
+    var idx = topic.split("-")[1];
+    var data = JSON.parse(message.payloadString);
+    var license = "unknown";
+    var payment_data = {};
+
+    if (data.id == "066f003839304d3143022816")
+        license = "E99668";
+	
+    if (data.id == "066fff495153847581095315")
+        license = "A93124";
+
+
+    if (data.id == "0666ff534952754967144119")
+        license = "B33899";
+
+    logMessage("INFO", "topic: ", topic, ", idx: ", idx, ", id: ", data.id, ", status: ", data.status, ", license: ", license);
+
+    payment_data.license = license;
+    payment_data.status = data.status;
+    payment_data.energy = data.energy;
+    payment_data.pay = (data.energy * 1.2).toFixed(2) + " RMB";
+    payment_data.progress = ((data.energy * 100) / data.total_energy).toFixed(2);
+
+    publish("payment-" + idx, JSON.stringify(payment_data)); 
+}
+
+function mqtt_connect_callback(reconnect, uri) {
+    subscribe("station-1");
+    subscribe("station-2");
+    subscribe("station-3");
+}
+
+document.addEventListener("DOMContentLoaded", function(event) { 
+  connect(mqtt_host, mqtt_port, "aiv-payment");
+});
+
+</script>
+
+</html>

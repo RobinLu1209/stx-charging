@@ -1,0 +1,5 @@
+apt-get install python3-paho-mqtt
+
+/boot/config.txt
+[all]
+display_rotate=1

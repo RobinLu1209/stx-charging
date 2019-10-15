@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>EV Charging Payment Demo</title>
+  <script src="paho-mqtt.js"></script>
+  <script src="mqtt.js"></script>
+</head>
+
+<body>
+
+  <pre id="consolePre"></pre>
+
+</body>
+
+<script type="text/javascript">
+
+var host = window.location.host;
+var url = new URL(window.location.href);
+var mqtt_host = url.searchParams.get("mqtt_host");
+var mqtt_port = url.searchParams.get("mqtt_port");
+var id = url.searchParams.get("id");
+
+function mqtt_connect_callback(reconnect, uri) {
+    subscribe("payment-" + id);
+}
+
+document.addEventListener("DOMContentLoaded", function(event) { 
+  connect(mqtt_host, mqtt_port, "aiv-" + id);
+});
+
+</script>
+
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>EV Charging Station Demo</title>
+  <script src="paho-mqtt.js"></script>
+  <script src="mqtt.js"></script>
+</head>
+
+<style>
+
+@keyframes r_l {
+    0%   {left: 100%; }
+    100%   {left: -100%; }
+}
+
+.move_from_right_to_left {
+    position: absolute;
+    -webkit-animation: r_l 5s linear infinite;
+    animation: r_l 5s linear infinite;
+}
+
+html, body
+{
+position: absolute;
+width: 98%;
+height: 50%;
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#myProgress {
+  width: 100%;
+  background-color: #ddd;
+}
+
+#progress {
+  width: 0%;
+  height: 30px;
+  background-color: #4CAF50;
+  text-align: center;
+  line-height: 30px;
+  color: white;
+}
+
+.charging-ui-welcome {
+  font-size:1000%;
+  display:inline-block;
+  margin-top: 30%;
+}
+
+.charging-ui-welcome-pie {
+  font-size:500%;
+  display:inline-block;
+  margin-top: 15%;
+}
+
+.charging-ui-logo {
+  padding-left:10%;
+  width:80%;
+  margin-top: 70%;
+  display:inline-block;
+}
+
+.charging-ui-logo-pie {
+  padding-left:10%;
+  width:80%;
+  margin-top: 45%;
+  display:inline-block;
+}
+
+.charging-ui-panel {
+  white-space:nowrap;
+  margin-top:30%;
+  margin-left:10%;
+  width:70%;
+  min-width: 700px;
+  padding: 5%;
+  font-size:180%;
+  -moz-border-radius: 2em; 
+  -webkit-border-radius: 2em;
+  border-radius: 2em;
+  -webkit-box-shadow: 3px 3px 6px #aaa; 
+  -moz-box-shadow: 3px 3px 6px #aaa; 
+  box-shadow: 0 5px 30px 0 rgba(204,204,204,0.80);
+}
+
+.charging-ui-panel-pie {
+  white-space:nowrap;
+  margin-top:10%;
+  margin-left:5%;
+  width:85%;
+  min-width: 300px;
+  padding: 3%;
+  font-size:85%;
+  -moz-border-radius: 1em; 
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  -webkit-box-shadow: 2px 2px 4px #aaa; 
+  -moz-box-shadow: 2px 2px 4px #aaa; 
+  box-shadow: 0 5px 30px 0 rgba(100,100,100,1.0);
+}
+
+.stx-logo-div {
+  position: absolute;
+  top: 300%;
+  width: 90%;
+  padding-left: 5%;
+}
+.stx-logo-img {
+  width: 20%;
+  padding-left: 14%;
+  padding-right: 15%;
+}
+
+</style>
+
+<body>
+
+<button id="btn_start" style="position:absolute; top:10%; left:10%; width:10%; height:10%;" onclick="start()">Start</button> 
+
+<div>
+  <video id="ad_player" style="display: none;" width="100%" onclick="charging_start()" loop>
+    <source src="intel_ad.mp4?v=2" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<div id="charging_welcome" width="100%" style="display:none;">
+    <font color="green"><h1 class="charging-ui-welcome-pie move_from_right_to_left">Welcome!</h1></font>
+</div>
+
+<div id="charging_ui" style="display:none;" onclick="charging_stop()" class="charging-ui-panel-pie">
+    <font color="blue"><h1 id="license">License Plate: E5895</h1></font>
+    <h1>Charging</h1>
+    <div id="myProgress">
+      <div id="progress">0%</div>
+    </div>
+    <br>
+    <h1 id="energy" >Total Energy: 0</h1>
+    <h1 id="total" >Total: 0 RMB</h1>
+    <font color="red"><h1 id="warning_msg" ></h1></font>
+    <font color="green"><h1 id="result" ></h1></font>
+</div>
+
+
+<div id="stx-logo" style="display:none;" class="stx-logo-div">
+    <img class="stx-logo-img" src="starlingx_logo.png" />
+    <img class="stx-logo-img" src="unionpay_logo.png" />
+</div>
+
+
+
+</body>
+
+<script type="text/javascript">
+var btn_start = document.getElementById("btn_start");
+var ad_player = document.getElementById("ad_player");
+var charging_welcome = document.getElementById("charging_welcome");
+var charging_ui = document.getElementById("charging_ui");
+var license = document.getElementById("license");   
+var total = document.getElementById("total");   
+var energy = document.getElementById("energy");   
+var result = document.getElementById("result");   
+var warning_msg = document.getElementById("warning_msg");   
+var progress = document.getElementById("progress");   
+var stx_logo = document.getElementById("stx-logo");
+
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
+
+function closeFullscreen(elem) {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
+
+function start() {
+    openFullscreen(document.documentElement);
+    btn_start.style.display = 'none';
+    charging_welcome.style.display = 'block';
+    stx_logo.style.display = 'block';
+    ad_player.style.display = 'block';
+    ad_player.play();
+}
+
+function charging_start() {
+//    ad_player.style.display = 'none';
+//    ad_player.pause();
+    charging_welcome.style.display = 'none';
+    charging_ui.style.display = 'block';
+    move();
+}
+
+function charging_stop() {
+    charging_welcome.style.display = 'block';
+    charging_ui.style.display = 'none';
+    result.innerHTML = "";
+    progress.innerHTML = '0%';
+//    ad_player.style.display = 'block';
+    ad_player.play();
+}
+
+function move() {
+  var width = 0;
+  var id = setInterval(frame, 100);
+
+  function frame() {
+    if (width >= 100) {
+      clearInterval(id);
+      result.innerHTML = "Auto Payment Completed"
+    } else {
+      width+=5; 
+      progress.style.width = width + '%'; 
+      progress.innerHTML = width * 1  + '%';
+      total.innerHTML = "Total: " + (width * 1.2).toFixed(2) + " RMB"
+    }
+  }
+}
+
+document.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+   event.preventDefault();
+   document.getElementById("btn_start").click();
+  }
+});
+
+</script>
+
+<script type="text/javascript">
+
+var host = window.location.host;
+var url = new URL(window.location.href);
+var mqtt_host = url.searchParams.get("mqtt_host");
+var mqtt_port = url.searchParams.get("mqtt_port");
+var station_idx = url.searchParams.get("station_idx");
+
+function mqtt_message_callback(message) {
+    console.log("On message!!!!")
+    var topic = message.destinationName;
+    var idx = topic.split("-")[1];
+    var data = JSON.parse(message.payloadString);
+    //data.license
+    //data.energy
+
+    logMessage("INFO",  "license: ", data.license, ", status: ", data.status, ", energy: ", data.energy, ", progress: ", data.progress, ", pay: ", data.pay );
+
+    warning_msg.innerHTML = "";
+    if (data.status == "idle")  {
+	  charging_ui.style.display = 'none';
+	  result.innerHTML = "";
+          progress.style.width = '0%'; 
+	  progress.innerHTML = '0%';
+	  ad_player.style.display = 'block';
+	  ad_player.play();
+      charging_ui.style.display = 'none';
+      charging_welcome.style.display = 'block';
+    }else if (data.status == "attached")  {
+      ad_player.style.display = 'none';
+      ad_player.pause();
+      charging_ui.style.display = 'block';
+      charging_welcome.style.display = 'none';
+      license.innerHTML = "License Plate: " + data.license;
+    }else if (data.status == "detached")  {
+      warning_msg.innerHTML = "Detached ...";
+    }else if (data.status == "charging")  {
+      progress.style.width = Number(data.progress) + '%'; 
+      progress.innerHTML = Number(data.progress) + '%';
+      energy.innerHTML = "Total Energy: " + data.energy;
+      total.innerHTML = "Total: " + data.pay;
+    }else if (data.status == "completed")  {
+      total.innerHTML = "Total: " + data.pay;
+      result.innerHTML = "Auto Payment Completed !!!";
+    }else {
+      logMessage("ERROR", "unkown message");
+    }
+}
+
+function mqtt_connect_callback(reconnect, uri) {
+    subscribe("payment-" + station_idx);
+}
+
+document.addEventListener("DOMContentLoaded", function(event) { 
+  connect(mqtt_host, mqtt_port, "aiv-station-" + station_idx);
+});
+
+</script>
+
+</html>

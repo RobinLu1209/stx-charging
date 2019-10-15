@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<style>
+
+html, body
+{
+width: 100%;
+height: 100%;
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#myProgress {
+  width: 100%;
+  background-color: #ddd;
+}
+
+#progress {
+  width: 0%;
+  height: 30px;
+  background-color: #4CAF50;
+  text-align: center;
+  line-height: 30px;
+  color: white;
+}
+
+
+.charging-ui-panel-horizon {
+  white-space:nowrap;
+  margin-top:5%;
+  margin-left:10%;
+  width:70%;
+  min-width: 700px;
+  padding: 5%;
+  font-size:180%;
+  -moz-border-radius: 2em; 
+  -webkit-border-radius: 2em;
+  border-radius: 2em;
+  -webkit-box-shadow: 3px 3px 6px #aaa; 
+  -moz-box-shadow: 3px 3px 6px #aaa; 
+  box-shadow: 0 5px 30px 0 rgba(204,204,204,0.80);
+}
+
+.charging-ui-panel-horizon-pie {
+  white-space:nowrap;
+  margin-top:5%;
+  margin-left:5%;
+  width:80%;
+  min-width: 500px;
+  padding: 5%;
+  font-size:90%;
+  -moz-border-radius: 1em; 
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  -webkit-box-shadow: 2px 2px 4px #aaa; 
+  -moz-box-shadow: 2px 2px 4px #aaa; 
+  box-shadow: 0 5px 30px 0 rgba(204,204,204,0.80);
+}
+
+</style>
+<body >
+
+<button id="btn_start" style="position:absolute; top:40%; left:40%; width:10%; height:10%;" onclick="start()">Start</button> 
+
+<video id="ad_player" style="display: none; background: black; height: 100%" width="100%" onclick="charging_start()" loop>
+  <source src="intel_ad.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<div id="charging_ui" style="display:none;" class="charging-ui-panel-horizon-pie" onclick="charging_stop()">
+    <font color="blue"><h1 id="license">License Plate: E5895</h1></font>
+    <h1>Charging</h1>
+    <div id="myProgress">
+      <div id="progress">0%</div>
+    </div>
+    <br>
+    <h1 id="total" >Total: 0 RMB</h1>
+    <font color="green"><h1 id="result" ></h1></font>
+</div>
+
+<script>
+
+var btn_start = document.getElementById("btn_start");
+var ad_player = document.getElementById("ad_player");
+var charging_ui = document.getElementById("charging_ui");
+var license = document.getElementById("license");   
+var total = document.getElementById("total");   
+var result = document.getElementById("result");   
+var progress = document.getElementById("progress");   
+
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
+
+function closeFullscreen(elem) {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
+
+function start() {
+    openFullscreen(document.documentElement);
+    btn_start.style.display = 'none';
+    ad_player.style.display = 'block';
+    ad_player.play();
+}
+
+function charging_start() {
+    ad_player.style.display = 'none';
+    ad_player.pause();
+    charging_ui.style.display = 'block';
+    move();
+}
+
+function charging_stop() {
+    charging_ui.style.display = 'none';
+    result.innerHTML = "";
+    progress.innerHTML = '0%';
+    ad_player.style.display = 'block';
+    ad_player.play();
+}
+
+function move() {
+  var width = 0;
+  var id = setInterval(frame, 100);
+
+  function frame() {
+    if (width >= 100) {
+      clearInterval(id);
+      result.innerHTML = "Auto Payment Completed !!!"
+    } else {
+      width+=5; 
+      progress.style.width = width + '%'; 
+      progress.innerHTML = width * 1  + '%';
+      total.innerHTML = "Total: " + (width * 1.2).toFixed(2) + " RMB"
+    }
+  }
+}
+</script>
+
+</body>
+</html>
